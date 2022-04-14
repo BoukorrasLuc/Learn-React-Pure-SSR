@@ -9,12 +9,12 @@ const PORT = 8080;
 const app = express();
 const router = express.Router();
 
-// Nous disons à notre serveur express d'importer l'application du côté client.
-// Nous disons à notre serveur express de servir le dossier /build en tant que fichiers statiques.
-// où la méthode renderToString de ReactDOMServer est responsable du rendu du contenu de notre application en chaîne html.
-// Remarques : ReactDOM.hydrate() est identique à render(), mais il est utilisé pour hydrater (attacher des écouteurs d'événement) un conteneur dont le contenu HTML a été rendu par      ReactDOMServer. React tentera d'attacher des écouteurs d'événement au balisage existant.
+// Nous allons dire à notre serveur express d'importer l'application du côté client.
 
 const serverRenderer = (req, res, next) => {
+  // Nous disons à notre serveur express de servir le dossier /build en tant que fichiers statiques.
+
+  // Le chemin renvoyé sera ./build/index.html puis qu'il s'agit du premier chemin absolu pouvant être construit.
   fs.readFile(path.resolve("./build/index.html"), "utf8", (err, data) => {
     if (err) {
       console.error(err);
@@ -23,17 +23,19 @@ const serverRenderer = (req, res, next) => {
     return res.send(
       data.replace(
         '<div id="root"></div>',
+        //la méthode renderToString de ReactDOMServer est responsable du rendu du contenu de notre application en chaîne html.
         `<div id="root">${ReactDOMServer.renderToString(<App />)}</div>`
       )
     );
   });
 };
 
+// ( path, function )
 router.use("^/$", serverRenderer);
 
+// Nous utilisons la méthode statique d'express pour fournir le dossier /build en tant que fichiers statiques.
 // __dirname est une constante qui contient le chemin absolu du dossier courant.
 // ".." est le chemin relatif vers le dossier parent.
-// Nous utilisons la méthode statique serve pour fournir le dossier /build en tant que fichiers statiques.
 
 router.use(express.static(path.resolve(__dirname, "..", "build")));
 
